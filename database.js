@@ -1,6 +1,8 @@
 const express = require('express');
 const mysql = require('mysql');
 
+const app = express();
+
 //create connection
 
 const db = mysql.createConnection({
@@ -13,13 +15,18 @@ const db = mysql.createConnection({
 //connect to database
 
 db.connect((err) => {
-    if (err) console.log('Error connecting to database');
-    else console.log("Connected to database!");
+    if (!err) {
+        console.log('Connected to database!');
+    } else {
+        console.log(err);
+    }
 });
 
-db.query("CREATE DATABASE mydatabase", (err, result) => {
-    if (err) console.log('Database Exists!');
-    else console.log("Database created");
+app.get("/", (res, req) => {
+    db.query("CREATE DATABASE mydatabase", (err, result) => {
+        if (!err) console.log("Database created ... nn");
+        else console.log(err);
+    });
 });
 
 //create user table
@@ -29,11 +36,6 @@ const createUserTable = 'CREATE TABLE User (' +
     'password varchar(255) NOT NULL, ' +
     'admin boolean NOT NULL, ' +
     'PRIMARY KEY (userID))';
-
-db.query(createUserTable, (err, result) => {
-    if (err) console.log('User Table Exists!');
-    else console.log(result);
-});
 
 //create item table
 const createItemTable = 'CREATE TABLE Item (' +
@@ -47,11 +49,6 @@ const createItemTable = 'CREATE TABLE Item (' +
     'weight int, ' +
     'PRIMARY KEY (itemID))';
 
-db.query(createItemTable, (err, result) => {
-    if (err) console.log('Item Table Exists!');
-    else console.log(result);
-});
-
 //create tracking company table
 const createTrackingCompanyTable = 'CREATE TABLE TrackingCompany (' +
     'companyID int NOT NULL AUTO_INCREMENT, ' +
@@ -59,11 +56,6 @@ const createTrackingCompanyTable = 'CREATE TABLE TrackingCompany (' +
     'url varchar(255), ' +
     'phone int, ' +
     'PRIMARY KEY (companyID))';
-
-db.query(createTrackingCompanyTable, (err, result) => {
-    if (err) console.log('Tracking Company Table Exists!');
-    else console.log(result);
-});
 
 //create packing list table
 const createPackingListTable = 'CREATE TABLE PackingList (' +
@@ -83,11 +75,6 @@ const createPackingListTable = 'CREATE TABLE PackingList (' +
     'FOREIGN KEY (userID) REFERENCES User(userID), ' +
     'FOREIGN KEY (companyID) REFERENCES TrackingCompany(companyID))';
 
-db.query(createPackingListTable, (err, result) => {
-    if (err) console.log('PackingList Table Exists!');
-    else console.log(result);
-});
-
 //create pack item table
 const createPackItemTable = 'CREATE TABLE PackItem (' +
     'packinglistID int, ' +
@@ -97,7 +84,46 @@ const createPackItemTable = 'CREATE TABLE PackItem (' +
     'FOREIGN KEY (packinglistID) REFERENCES PackingList(packinglistID), ' +
     'FOREIGN KEY (itemID) REFERENCES Item(itemID))';
 
-db.query(createPackItemTable, (err, result) => {
-    if (err) console.log('PackItem Exists!');
-    else console.log(result);
+app.get("/createtables", (res, req) => {
+    db.query(createUserTable, (err, result) => {
+        if (err) console.log('User Table Exists!');
+        else console.log(result);
+    });
+    db.query(createItemTable, (err, result) => {
+        if (err) console.log('Item Table Exists!');
+        else console.log(result);
+    });
+    db.query(createTrackingCompanyTable, (err, result) => {
+        if (err) console.log('Tracking Company Table Exists!');
+        else console.log(result);
+    });
+    db.query(createPackingListTable, (err, result) => {
+        if (err) console.log('PackingList Table Exists!');
+        else console.log(result);
+    });
+    db.query(createPackItemTable, (err, result) => {
+        if (err) console.log('PackItem Exists!');
+        else console.log(result);
+    });
 });
+
+/*
+app.get("/insertuser", (res, req) => {
+    db.query("INSERT INTO User VALUES (user, password,Y)", (err, result) => {
+        if (!err) console.log('user inserted');
+        else console.log(result);
+    });
+});
+*/
+
+//test
+app.get("/users", (req, res) => {
+    db.query("SELECT * FROM User", (err, rows, fields) => {
+        if (!err)
+            res.json(rows);
+        else
+            console.log(err);
+    });
+});
+
+app.listen(3000);
