@@ -5,28 +5,24 @@ const app = express();
 
 //create connection
 
+const createdb = mysql.createConnection({
+    host: 'localhost',
+    user: 'root',
+    password: 'password'
+});
+
+app.get("/", (res, req) => {
+    createdb.query("CREATE DATABASE mydatabase", (err, result) => {
+        if (!err) console.log("Database created ... nn");
+        else console.log(err);
+    });
+});
+
 const db = mysql.createConnection({
     host: 'localhost',
     user: 'root',
     password: 'password',
     database: 'mydatabase'
-});
-
-//connect to database
-
-db.connect((err) => {
-    if (!err) {
-        console.log('Connected to database!');
-    } else {
-        console.log(err);
-    }
-});
-
-app.get("/", (res, req) => {
-    db.query("CREATE DATABASE mydatabase", (err, result) => {
-        if (!err) console.log("Database created ... nn");
-        else console.log(err);
-    });
 });
 
 //create user table
@@ -85,6 +81,13 @@ const createPackItemTable = 'CREATE TABLE PackItem (' +
     'FOREIGN KEY (itemID) REFERENCES Item(itemID))';
 
 app.get("/createtables", (res, req) => {
+    db.connect((err) => {
+        if (!err) {
+            console.log('Connected to database!');
+        } else {
+            console.log(err);
+        }
+    });
     db.query(createUserTable, (err, result) => {
         if (err) console.log('User Table Exists!');
         else console.log(result);
